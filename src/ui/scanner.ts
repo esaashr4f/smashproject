@@ -8,8 +8,8 @@ import { droppedFolderSource, hasDirectoryPicker, pickFolder } from './folder';
 import { gameBananaPanel, loadLinks } from './gamebanana';
 
 const NEEDS_LABEL: Record<string, string> = {
-  '1.6.8': 'likely 1.6.8',
-  '2.0.0': 'needs 2.0',
+  '1.6.8': '1.6.8',
+  '2.0.0': '2.0',
   either: 'either version',
   unreleased: 'unreleased Smashline!',
   unknown: 'unclear (clone_weapon)',
@@ -89,7 +89,7 @@ function renderReport(out: HTMLElement, r: ScanReport, rerun: () => void) {
         h(
           'p',
           { class: 'small muted' },
-          '"Unclear" movesets call clone_weapon, whose arguments changed in 2.0 without a rename. Link their GameBanana page below to use the update date as a hint, or check your crash logs: an old-Smashline crash on 2.0 points at them.',
+          'Movesets that call clone_weapon are checked by reading how their code calls it (its arguments changed in 2.0 without a rename). Tap a verdict in the table to see why. "Unclear" ones couldn\u2019t be settled: link their GameBanana page below to use the update date as a hint.',
         ),
       ),
     );
@@ -107,7 +107,18 @@ function renderReport(out: HTMLElement, r: ScanReport, rerun: () => void) {
           { class: mod.disabled ? 'disabled' : undefined },
           h('td', { 'data-label': 'Mod' }, mod.name, mod.disabled ? h('span', { class: 'muted' }, ' (disabled)') : null),
           h('td', { 'data-label': 'Slots' }, mod.slots || '–'),
-          h('td', { 'data-label': 'Smashline', title: mod.moveset?.needsReason ?? '' }, mod.moveset ? NEEDS_LABEL[mod.moveset.needs] ?? mod.moveset.needs : '–'),
+          h(
+            'td',
+            { 'data-label': 'Smashline' },
+            mod.moveset
+              ? h(
+                  'details',
+                  { class: 'why' },
+                  h('summary', {}, NEEDS_LABEL[mod.moveset.needs] ?? mod.moveset.needs, ['1.6.8', '2.0.0', 'either', 'unreleased'].includes(mod.moveset.needs) ? badge(mod.moveset.needsConfidence, `conf-${mod.moveset.needsConfidence}`) : null),
+                  h('span', { class: 'small muted' }, mod.moveset.needsReason),
+                )
+              : '–',
+          ),
           h('td', { 'data-label': 'Status' }, SEVERITY_ICON[mod.status]),
           h('td', { 'data-label': 'Issues' }, mod.issues.map((i) => i.title).join('; ') || '–'),
         ),

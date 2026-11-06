@@ -158,3 +158,5 @@ tr.disabled { opacity: 0.6; }
   td::before { content: attr(data-label) ': '; color: var(--muted); font-size: 0.8rem; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+.why > summary { cursor: pointer; white-space: nowrap; }
+.why[open] > span { display: block; max-width: 22rem; margin-top: 0.25rem; }

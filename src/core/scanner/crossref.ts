@@ -6,38 +6,41 @@ export function crossReference(crashes: Explanation[], movesets: MovesetInfo[], 
   const out: Finding[] = [];
   const active = movesets.filter((m) => !m.disabled);
   const usesClone = (m: MovesetInfo) => m.plugins.some((p) => p.smashline?.abiSensitive.includes('smashline_clone_weapon'));
+  // The clone_weapon layout read from the moveset's code, when we could tell.
+  const abi = (m: MovesetInfo) => m.plugins.find((p) => p.rel.toLowerCase() === 'plugin.nro')?.callSite?.abi ?? 'unknown';
   const seen = new Set<string>();
   const latest = (id: string) => crashes.find((c) => c.best.ruleId === id);
 
   const old = latest('smashline2_old_clone_weapon_abi');
   if (old && !seen.has(old.best.ruleId)) {
     seen.add(old.best.ruleId);
-    const suspects = active.filter((m) => usesClone(m) && m.needs !== '2.0.0');
+    // An old-layout call crashes 2.0. Unknown layouts stay suspects unless they need 2.0 anyway.
+    const suspects = active.filter((m) => usesClone(m) && (abi(m) === 'old' || (abi(m) === 'unknown' && m.needs !== '2.0.0')));
     const strong = suspects.filter((m) => m.needs === '1.6.8');
-    const unreleased = active.filter((m) => m.needs === 'unreleased');
+    const unreleased = active.filter((m) => m.needs === 'unreleased' && abi(m) !== 'new');
     const list = [...new Set([...unreleased, ...strong, ...suspects].map((m) => m.mod))];
     if (list.length)
       out.push({
         id: 'xref_smashline2_culprits',
         severity: 'error',
-        confidence: list.length === 1 ? 'likely' : 'possible',
+        confidence: list.length === 1 && abi(active.find((m) => m.mod === list[0])!) === 'old' ? 'likely' : 'possible',
         title: `Likely cause of your Smashline 2.0 crash: ${list.slice(0, 3).join(', ')}${list.length > 3 ? ` (+${list.length - 3} more)` : ''}`,
         detail:
-          'Your crash reports show an old-Smashline moveset crashing in Smashline 2.0\'s clone_weapon. These active movesets call clone_weapon and have no 2.0-only code' +
+          'Your crash reports show an old-Smashline moveset crashing in Smashline 2.0\'s clone_weapon. These active movesets call clone_weapon with the old (1.6.8) layout' +
           (unreleased.length ? `; ${unreleased.map((m) => m.mod).join(', ')} also need${unreleased.length === 1 ? 's' : ''} an unreleased Smashline` : '') + '.',
         fix: 'Move these out of mods/ one at a time, launching once after each, to find the culprit. Or switch to Smashline 1.6.8.',
       });
   }
   const neu = latest('smashline168_new_clone_weapon_abi');
   if (neu) {
-    const suspects = active.filter((m) => usesClone(m) && m.needs !== '1.6.8');
+    const suspects = active.filter((m) => usesClone(m) && (abi(m) === 'new' || (abi(m) === 'unknown' && m.needs !== '1.6.8')));
     if (suspects.length)
       out.push({
         id: 'xref_smashline168_culprits',
         severity: 'error',
         confidence: suspects.length === 1 ? 'likely' : 'possible',
         title: `Likely cause of your Smashline 1.6.8 crash: ${suspects.map((m) => m.mod).slice(0, 3).join(', ')}`,
-        detail: 'Your crash reports show a 2.0-built moveset crashing in Smashline 1.6.8. These active movesets call clone_weapon and may be built for 2.0 (recently updated, or 2.0-only code).',
+        detail: 'Your crash reports show a 2.0-built moveset crashing in Smashline 1.6.8. These active movesets call clone_weapon with the 2.0 layout (or a layout we could not read).',
         fix: 'Use Smashline 2.0.0 for these, or move them out of mods/.',
       });
   }

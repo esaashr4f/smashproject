@@ -1,5 +1,6 @@
 // Moveset plugin.nro files: Smashline requirement + the same plugin copied into two mods.
 import { analyseSmashline, abiHintFromDate, type SmashlineAnalysis } from '../../nro/smashline';
+import { cloneWeaponAbi, type CallSiteResult } from '../../nro/callsite';
 import { sha256Hex } from '../../hash';
 import type { Confidence, Finding } from '../../types';
 import type { FileSource } from '../source';
@@ -11,7 +12,7 @@ export interface MovesetInfo {
   mod: string;
   disabled: boolean;
   /** Plugin path relative to the mod (normally "plugin.nro"; nested copies included). */
-  plugins: { rel: string; path: string; size: number; sha256?: string; smashline?: SmashlineAnalysis }[];
+  plugins: { rel: string; path: string; size: number; sha256?: string; smashline?: SmashlineAnalysis; callSite?: CallSiteResult }[];
   needs: Needs;
   needsConfidence: Confidence;
   needsReason: string;
@@ -37,6 +38,7 @@ export async function movesetChecks(source: FileSource, m: SdModel, opts: Movese
         size: f.size,
         sha256: bytes ? await sha256Hex(bytes) : undefined,
         smashline: bytes ? analyseSmashline(bytes) : undefined,
+        callSite: bytes ? cloneWeaponAbi(bytes) : undefined,
       });
     }
     const main = info.plugins.find((p) => p.rel.toLowerCase() === 'plugin.nro') ?? info.plugins[0]!;
@@ -51,10 +53,19 @@ export async function movesetChecks(source: FileSource, m: SdModel, opts: Movese
         case 'needs_2.0': info.needs = '2.0.0'; info.needsConfidence = 'certain'; break;
         case 'needs_unreleased': info.needs = 'unreleased'; info.needsConfidence = 'certain'; break;
         case 'abi_sensitive': {
+          // Best evidence: how its code actually calls clone_weapon. Date is a fallback hint.
+          const cs = main.callSite;
           const hint = abiHintFromDate(opts.lastUpdated?.[mod.name]);
-          info.needs = hint.likely === '1.6.8' ? '1.6.8' : 'unknown';
-          info.needsConfidence = hint.confidence;
-          info.needsReason = `${a.reason} ${hint.reason}`;
+          if (cs && cs.abi !== 'unknown') {
+            info.needs = cs.abi === 'old' ? '1.6.8' : '2.0.0';
+            info.needsConfidence = cs.confidence;
+            const disagree = hint.likely === '1.6.8' && cs.abi === 'new';
+            info.needsReason = `${cs.reason}${disagree ? ` (Its update date suggested 1.6.8, but the code says otherwise.)` : ''}`;
+          } else {
+            info.needs = hint.likely === '1.6.8' ? '1.6.8' : 'unknown';
+            info.needsConfidence = hint.confidence;
+            info.needsReason = `${a.reason} ${cs?.reason ?? ''} ${hint.reason}`.replace(/\s+/g, ' ').trim();
+          }
           break;
         }
       }

@@ -134,4 +134,19 @@ describe.skipIf(!existsSync(BIN))('binaries in a fake SD tree', () => {
     expect(x?.title).toContain('tetrimino');
     expect(x?.title).toContain('blaze');
   });
+  it('blames Herobrine (new layout) for the 1.6.8 crash, not old-layout movesets', async () => {
+    const logName = '01793920898_01006a800016e000.log';
+    const r = await scan(
+      memorySource([
+        { path: 'ultimate/mods/herobrine/plugin.nro', bytes: new Uint8Array(readFileSync(BIN + 'herobrine_plugin.nro')) },
+        { path: 'ultimate/mods/tetrimino/plugin.nro', bytes: new Uint8Array(readFileSync(BIN + 'tetrimino_plugin.nro')) },
+        { path: 'ultimate/mods/tails/plugin.nro', bytes: new Uint8Array(readFileSync(BIN + 'tails_plugin.nro')) },
+        { path: 'atmosphere/crash_reports/' + logName, bytes: readFileSync('fixtures/crash_logs/' + logName) },
+      ]),
+    );
+    const x = r.findings.find((f) => f.id === 'xref_smashline168_culprits');
+    expect(x?.title).toBe('Likely cause of your Smashline 1.6.8 crash: herobrine');
+    expect(r.mods.find((m) => m.name === 'herobrine')?.moveset?.needs).toBe('2.0.0');
+    expect(r.mods.find((m) => m.name === 'tails')?.moveset?.needs).toBe('1.6.8');
+  });
 });

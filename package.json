@@ -12,11 +12,15 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "explain": "vite-node scripts/explain.ts",
-    "scan-csv": "vite-node scripts/scan-csv.ts"
+    "explain": "vite-node scripts/explain.ts --",
+    "scan-csv": "vite-node scripts/scan-csv.ts --",
+    "fingerprints": "vite-node scripts/build-fingerprints.ts --",
+    "hash-release": "vite-node scripts/hash-release.ts --",
+    "callsites": "vite-node scripts/callsite-report.ts --"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
+    "fflate": "^0.8.3",
     "typescript": "^5.9.3",
     "vite": "^6.4.5",
     "vite-node": "^3.2.4",

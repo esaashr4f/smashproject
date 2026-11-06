@@ -49,3 +49,34 @@ describe('classifyNames', () => {
     expect(classifyNames([]).verdict).toBe('none');
   });
 });
+
+// Call-site analysis: settles the clone_weapon ABI from the code itself.
+import { cloneWeaponAbi } from '../src/core/nro/callsite';
+describe.skipIf(!have)('clone_weapon call-site analysis on private binaries', () => {
+  const exp = have
+    ? (JSON.parse(readFileSync(DIR + 'EXPECTED.json', 'utf8')) as { expected: Record<string, { verdict: string }> }).expected
+    : {};
+  const wantAbi = (v: string) =>
+    v.startsWith('likely_1.6.8') ? 'old' : v.startsWith('needs_2.0') ? 'new' : null;
+  for (const [file, e] of Object.entries(exp)) {
+    const want = wantAbi(e.verdict);
+    if (!want) continue;
+    const bytes = new Uint8Array(readFileSync(DIR + file));
+    if (!analyseSmashline(bytes).abiSensitive.includes('smashline_clone_weapon')) continue;
+    it(`${file}: ${e.verdict} -> ${want} ABI`, () => expect(cloneWeaponAbi(bytes).abi).toBe(want));
+  }
+  it('Herobrine (no 2.0-only names, but crashed on 1.6.8) uses the new ABI', () => {
+    expect(cloneWeaponAbi(new Uint8Array(readFileSync(DIR + 'herobrine_plugin.nro'))).abi).toBe('new');
+  });
+});
+
+import { writtenRegs } from '../src/core/nro/callsite';
+describe('AArch64 register-write decoding', () => {
+  it('decodes the instructions the analysis relies on', () => {
+    expect(writtenRegs(0x2a1303e2)).toEqual([2]); // mov w2, w19
+    expect(writtenRegs(0x528002a4)).toEqual([4]); // mov w4, #0x15
+    expect(writtenRegs(0x2a1f03e7)).toEqual([7]); // mov w7, wzr
+    expect(writtenRegs(0xf90003e7)).toEqual([]); // str x7, [sp]  (a store writes nothing)
+    expect(writtenRegs(0xa94007e0)).toEqual([0, 1]); // ldp x0, x1, [sp]
+  });
+});
