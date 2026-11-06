@@ -108,4 +108,4 @@ export function csvSource(text: string): FileSource {
 
 /** The PowerShell one-liner users run when their browser has no folder picker. */
 export const POWERSHELL_LISTING_COMMAND =
-  `$m='D:\\ultimate\\mods'; Get-ChildItem $m -Recurse -File | ForEach-Object { [pscustomobject]@{ Mod = $_.FullName.Substring($m.Length+1).Split('\\')[0]; Path = $_.FullName.Substring($m.Length+1); Size = $_.Length } } | Export-Csv "$env:USERPROFILE\\Desktop\\modfiles.csv" -NoTypeInformation -Encoding UTF8`;
+  `$m='D:\\ultimate\\mods'; Get-ChildItem $m -Recurse -File -Force | ForEach-Object { [pscustomobject]@{ Mod = $_.FullName.Substring($m.Length+1).Split('\\')[0]; Path = $_.FullName.Substring($m.Length+1); Size = $_.Length } } | Export-Csv "$env:USERPROFILE\\Desktop\\modfiles.csv" -NoTypeInformation -Encoding UTF8`;

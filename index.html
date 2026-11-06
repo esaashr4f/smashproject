@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Free, private, in-browser diagnosis of Super Smash Bros. Ultimate mod setups: explain Atmosphère crash logs and scan your SD card." />
+    <meta name="color-scheme" content="light dark" />
+    <title>Smash Mod Doctor</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="top">
+      <a class="brand" href="#/explain"><span aria-hidden="true">🩺</span> Smash Mod Doctor</a>
+      <nav aria-label="Main">
+        <a href="#/explain" data-route="explain">Crash Explainer</a>
+        <a href="#/scan" data-route="scan">SD Card Scanner</a>
+        <a href="#/about" data-route="about">About &amp; FAQ</a>
+      </nav>
+      <button id="theme" class="ghost" type="button" aria-label="Toggle dark mode">🌓</button>
+    </header>
+    <main id="main" tabindex="-1"></main>
+    <footer class="foot">
+      Runs entirely in your browser. Nothing is uploaded. ·
+      <a href="https://github.com/esaashr4f/smashproject" rel="noopener">Source (MIT)</a>
+    </footer>
+    <script type="module" src="/src/ui/main.ts"></script>
+  </body>
+</html>
