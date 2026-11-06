@@ -1,0 +1,15 @@
+{
+  "_about": "SHA-256 fingerprints of known Skyline-ecosystem files, verified 2026-11-05 by downloading the official assets. Extend this list (ARCropolis 4.0.10/4.1.0/4.1.1, nro_hook 0.4.0, older Smashline/plugins) by downloading release assets and hashing them. NEVER identify versions from 'latest' links. Always hash the actual asset.",
+  "files": [
+    {"name": "libsmashline_plugin.nro", "product": "Smashline", "version": "1.6.7", "size": 303104, "sha256": "d472c596ea7aec692c9daaf22ed995856c8992f1c7f762b04789e5c25b4772be", "game": "13.0.5 only", "notes": "First 13.0.5 build"},
+    {"name": "libsmashline_plugin.nro", "product": "Smashline", "version": "1.6.8", "size": 311296, "sha256": "a83636e565be0729271aa7c21817da9aa3b8b3e9b3abed7499c1eeae4cb57d5c", "game": "13.0.5 only", "notes": "Last release with the OLD clone_weapon/update_weapon_count API"},
+    {"name": "libsmashline_plugin.nro", "product": "Smashline", "version": "2.0.0", "size": 364544, "sha256": "d57a437000d13a85192b79941880b4e3b671d0e4a0291951d426f0f6773e6b92", "game": "13.0.5 only", "notes": "Released 2026-10-28. NEW clone_weapon/update_weapon_count API. Breaks old movesets that clone weapons."},
+    {"name": "libparam_config.nro", "product": "Param Config", "version": "latest (6.5)", "size": 253952, "sha256": "f014f3143ca8ff0b9b2dcbacdb07acc598c2a76cacd7f754097ea2a8f896889a"},
+    {"name": "libthe_csk_collection.nro", "product": "The CSK Collection", "version": "6.0.0", "size": 1515520, "sha256": "5c4e39ef3cbc6f03792483a23542e34a4ce9212b77a9cf265380339d39787efc", "game": "13.0.5", "notes": "Released 2026-11-03; first 13.0.5-compatible CSK"},
+    {"name": "libone_slot_eff.nro", "product": "One Slot Effects", "version": "13.0.5 build (GameBanana 549058)", "size": 344064, "sha256": "ee27ab9735b06b372ae4e6f8cd208bceb42ee488b02bdf3ff1b62b72fa9a0327", "notes": "The '(OUTDATED)' page 394173 stops at 13.0.2"},
+    {"name": "libstage_config.nro", "product": "Stage Config", "version": "1.1.1", "size": 401408, "sha256": "c9432a26a760bf47c624d3de352367ccfff0422d377bccdd754d7015579fc689", "game": "13.0.5"},
+    {"name": "subsdk9", "product": "Skyline", "version": "latest official release", "size": 47841, "sha256": "9959ecb13eab6db81a07cee04a789b1905fd605409fc84efeb7ec43da7e29280", "module_id": "EAA2C23A4AA1FABBEB98F389C47E0450570CAB0C", "notes": "Has the page-boundary verify bug (crash at Skyline+0x4C58, addr 0x69)"},
+    {"name": "subsdk9", "product": "Skyline", "version": "latest + 4-byte verify patch (unofficial, by this project's author)", "size": 91216, "sha256": "43f6beca9fd8cf71f7ee979ce19925d23513dc5da9eac890c4b3712c7be7b597", "module_id": "EAA2C23A4AA1FABBEB98F389C47E0450570CAB0C", "notes": "Uncompressed NSO; same module ID as official. Distinguish by hash/size."},
+    {"name": "main.npdm", "product": "Skyline", "version": "latest official release", "size": 972, "sha256": "09538851176328215eb5fd959fb887511b21b31f3d713f0e14caffc75a95c34a"}
+  ]
+}
