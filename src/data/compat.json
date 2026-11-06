@@ -1,0 +1,19 @@
+{
+  "_about": "Known plugin problems, keyed on product + identified version (from known_plugins.json hashes). 'when' conditions: 'installed' = another product is installed.",
+  "issues": [
+    { "product": "Skyline", "version": "latest official release", "when": { "installed": "Smashline" }, "severity": "warning", "confidence": "certain",
+      "title": "Official Skyline has the page-boundary bug",
+      "detail": "With Smashline installed, the official subsdk9 crashes at Skyline + 0x4c58 on game 13.0.5.",
+      "fix": "Use the patched subsdk9 (4-byte patch check)." },
+    { "product": "Smashline", "version": "1.6.7", "severity": "info", "confidence": "likely",
+      "title": "Smashline 1.6.7 is an early 13.0.5 build",
+      "detail": "1.6.8 is the last release with the old moveset API and has fixes over 1.6.7.",
+      "fix": "Update to 1.6.8 (old movesets) or 2.0.0 (new movesets)." }
+  ],
+  "unknownBuildAdvice": {
+    "Smashline": "Only Smashline 1.6.7+ supports game 13.0.5. An unrecognised build may be older; get 1.6.8 or 2.0.0 from the official releases.",
+    "The CSK Collection": "CSK versions before 6.0.0 don't support game 13.0.5.",
+    "One Slot Effects": "The '(OUTDATED)' One Slot Effects page stops at 13.0.2; use the 13.0.5 build (GameBanana 549058).",
+    "Stage Config": "Stage Config before 1.1.1 doesn't support game 13.0.5."
+  }
+}

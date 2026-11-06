@@ -1,0 +1,12 @@
+{
+  "_about": "How to read smashline_* names found in a moveset's plugin.nro. The full name lists per release are in smashline_<version>_names.txt. Add a release: drop its names file next to them and add it to 'releases' (oldest first).",
+  "releases": [
+    { "version": "1.6.8", "namesFile": "smashline_1.6.8_names.txt", "abi": "old" },
+    { "version": "2.0.0", "namesFile": "smashline_2.0.0_names.txt", "abi": "new", "date": "2026-10-28" }
+  ],
+  "abiSensitive": ["smashline_clone_weapon", "smashline_update_weapon_count", "smashline_whitelist_kirby_copy_article"],
+  "abiNote": "Smashline 2.0.0 changed the argument layout of these functions without renaming them. Old ABI: clone_weapon(name ptr x0, len x1, kind w2, str x3/x4, str x5/x6, bool w7). New ABI: clone_weapon(str x0/x1, str x2/x3, kind w4, bool w5).",
+  "infoOnly": ["smashline_install_symbol_hook"],
+  "notApi": ["smashline_plugin", "smashline_test", "smashline_script", "smashline_interpreter", "smashline_interpreter_landing", "smashline_interpreter_stack"],
+  "apiVerbs": ["install", "uninstall", "update", "clone", "get", "set", "replace", "enable", "whitelist", "add", "remove", "reload", "load", "refresh"]
+}

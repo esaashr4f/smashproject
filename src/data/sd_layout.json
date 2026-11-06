@@ -1,0 +1,23 @@
+{
+  "_about": "What a healthy SD card looks like. Used by the scanner checks.",
+  "smashTitle": "atmosphere/contents/01006A800016E000",
+  "exefsAllowed": ["main.npdm", "subsdk9"],
+  "smashTitleNormal": ["exefs", "romfs", "manual_html", "romfs_metadata.bin"],
+  "pluginsDir": "romfs/skyline/plugins",
+  "devPlugin": "romfs/smashline/development.nro",
+  "modsDir": "ultimate/mods",
+  "inactiveDirSuggestion": "ultimate/mods_all",
+  "gameFolders": ["fighter", "ui", "effect", "sound", "camera", "stage", "stream;", "assist", "item", "prebuilt;", "standard", "boss", "common", "enemy", "finalsmash", "menu", "param", "pokemon", "render", "shader", "snapshot", "spirits", "ui;", "append"],
+  "modFiles": ["config.json", "info.toml", "plugin.nro", "preview.webp", "preview.png", "preview.jpg"],
+  "modFilePatterns": ["\\.toml$", "\\.txt$", "\\.md$", "\\.webp$", "\\.png$", "\\.jpg$", "\\.json$"],
+  "keyFiles": ["plugin.nro", "config.json"],
+  "keyFileExtensions": [".numshb", ".nutexb", ".numdlb", ".nusktb"],
+  "patchExtensions": [".xmsbt", ".prcxml", ".patch3prc", ".prcx", ".stdatxml", ".motdiff", ".yml"],
+  "maxPathLength": 180,
+  "cskExtras": {
+    "plugin": "libthe_csk_collection.nro",
+    "markers": ["flags/"],
+    "note": "The CSK Collection's optional 'extras' (12-hour time, Unlock All Characters, ...) are mod folders containing flag files that only the CSK plugin reads."
+  },
+  "ozone": { "note": "Ozone replaces Skyline's exefs files. It conflicts with a patched Skyline subsdk9; use one or the other." }
+}
