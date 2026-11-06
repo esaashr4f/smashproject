@@ -1,6 +1,7 @@
 // Moveset plugin.nro files: Smashline requirement + the same plugin copied into two mods.
 import { analyseSmashline, abiHintFromDate, type SmashlineAnalysis } from '../../nro/smashline';
 import { cloneWeaponAbi, type CallSiteResult } from '../../nro/callsite';
+import { lookupFingerprint, type FingerprintMatch } from '../../fingerprints';
 import { sha256Hex } from '../../hash';
 import type { Confidence, Finding } from '../../types';
 import type { FileSource } from '../source';
@@ -13,6 +14,8 @@ export interface MovesetInfo {
   disabled: boolean;
   /** Plugin path relative to the mod (normally "plugin.nro"; nested copies included). */
   plugins: { rel: string; path: string; size: number; sha256?: string; smashline?: SmashlineAnalysis; callSite?: CallSiteResult }[];
+  /** Exact GameBanana mod/version, if the plugin's hash is in the fingerprint database. */
+  identified?: FingerprintMatch;
   needs: Needs;
   needsConfidence: Confidence;
   needsReason: string;
@@ -43,6 +46,17 @@ export async function movesetChecks(source: FileSource, m: SdModel, opts: Movese
     }
     const main = info.plugins.find((p) => p.rel.toLowerCase() === 'plugin.nro') ?? info.plugins[0]!;
     const a = main.smashline;
+    info.identified = lookupFingerprint(main.sha256);
+    if (info.identified?.newer)
+      findings.push({
+        id: 'mod_update_available',
+        severity: 'info',
+        confidence: 'certain',
+        mod: mod.name,
+        title: `"${mod.name}" has a newer version on GameBanana`,
+        detail: `Your plugin.nro matches ${info.identified.modName} (${info.identified.fileName}, ${info.identified.fileDate}). A newer file was added on ${info.identified.newer.date}.`,
+        fix: `Check ${info.identified.url} for the update (read its changelog first: a new version may need a different Smashline).`,
+      });
     if (!a) {
       info.needs = 'unchecked';
       info.needsReason = "Can't read the plugin in this mode (CSV listing), so the Smashline version is unknown.";

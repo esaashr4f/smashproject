@@ -13,6 +13,7 @@ import { unzipSync } from 'fflate';
 import { fetchMod, GB_GAME_ID } from '../src/core/gamebanana';
 import { sha256Hex } from '../src/core/hash';
 import { analyseSmashline } from '../src/core/nro/smashline';
+import { cloneWeaponAbi } from '../src/core/nro/callsite';
 
 const OUT = 'src/data/fingerprints.json';
 const UA = 'smash-mod-doctor-fingerprints/0.1 (+https://github.com/esaashr4f/smashproject)';
@@ -30,6 +31,7 @@ interface Fingerprint {
   fileDate: string;
   pathInArchive: string;
   smashline?: string;
+  cloneWeaponAbi?: string;
 }
 type Db = { _about: string; generated: string; mods: Record<string, { name: string; latestFileId: number; latestFileDate: string }>; fingerprints: Fingerprint[] };
 
@@ -74,7 +76,7 @@ async function main() {
         console.log(`  skip ${f.name} (only .zip is supported)`);
         continue;
       }
-      if (f.size > 400e6) {
+      if (f.size > 400e6 && !args.includes('--big')) {
         console.log(`  skip ${f.name} (too big)`);
         continue;
       }
@@ -110,10 +112,11 @@ async function main() {
           fileDate: f.added.toISOString().slice(0, 10),
           pathInArchive: path,
           smashline: kind === 'plugin.nro' ? analyseSmashline(bytes).verdict : undefined,
+          cloneWeaponAbi: kind === 'plugin.nro' && analyseSmashline(bytes).abiSensitive.includes('smashline_clone_weapon') ? cloneWeaponAbi(bytes).abi : undefined,
         };
         db.fingerprints.push(fp);
         known.add(`${f.id}:${path}`);
-        console.log(`  ${f.name} ${path} ${fp.sha256.slice(0, 12)}… ${fp.smashline ?? ''}`);
+        console.log(`  ${f.name} ${path} ${fp.sha256.slice(0, 12)}… ${fp.smashline ?? ''} ${fp.cloneWeaponAbi ?? ''}`);
       }
     }
   }

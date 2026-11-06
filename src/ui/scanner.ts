@@ -105,7 +105,15 @@ function renderReport(out: HTMLElement, r: ScanReport, rerun: () => void) {
         h(
           'tr',
           { class: mod.disabled ? 'disabled' : undefined },
-          h('td', { 'data-label': 'Mod' }, mod.name, mod.disabled ? h('span', { class: 'muted' }, ' (disabled)') : null),
+          h(
+            'td',
+            { 'data-label': 'Mod' },
+            mod.name,
+            mod.disabled ? h('span', { class: 'muted' }, ' (disabled)') : null,
+            mod.moveset?.identified
+              ? h('div', { class: 'small' }, h('a', { href: mod.moveset.identified.url, target: '_blank', rel: 'noopener' }, mod.moveset.identified.modName), ` · ${mod.moveset.identified.fileDate}`)
+              : null,
+          ),
           h('td', { 'data-label': 'Slots' }, mod.slots || '–'),
           h(
             'td',
