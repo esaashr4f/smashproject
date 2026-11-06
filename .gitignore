@@ -1,3 +1,7 @@
+# Third-party mod binaries: private test data, never publish
 fixtures/private_mod_binaries/
+
 node_modules/
 dist/
+.vercel/
+*.local

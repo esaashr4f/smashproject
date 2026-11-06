@@ -1,0 +1,24 @@
+{
+  "_about": "Advice for homebrew apps (run through hbloader, program ID 01007ef00011e000) that are known to crash. Keys are lower-case module names from the crash report.",
+  "apps": {
+    "appstore": {
+      "name": "Homebrew App Store",
+      "advice": "Older builds of the Homebrew App Store crash on current firmware.",
+      "fix": "Update the Homebrew App Store from its GitHub releases, or use a maintained alternative such as sphaira."
+    },
+    "themezer-nx": {
+      "name": "Themezer-NX",
+      "advice": "Themezer-NX relies on an online service that is no longer running, so it crashes.",
+      "fix": "Delete Themezer-NX (switch/Themezer-NX/ or its .nro in switch/)."
+    },
+    "nx-shell": {
+      "name": "NX-Shell",
+      "advice": "Old NX-Shell builds are incompatible with current firmware.",
+      "fix": "Update NX-Shell to the latest release from its GitHub page."
+    }
+  },
+  "default": {
+    "advice": "Homebrew apps often crash after a firmware or Atmosphère update until they're updated.",
+    "fix": "Update {app} to its latest release, or remove it if it's no longer maintained."
+  }
+}

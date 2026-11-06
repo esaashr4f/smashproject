@@ -1,0 +1,212 @@
+{
+  "_about": "Crash-log rules. Each rule's 'match' is a list of conditions that must ALL hold. See src/core/crashlog/match.ts for the condition language. Numbers may be written as hex strings (\"0x4c58\"). Every rule must be backed by a real log in fixtures/crash_logs/ or a documented source.",
+  "rules": [
+    {
+      "id": "not_a_crash_log",
+      "title": "This file isn't a crash report",
+      "severity": "info",
+      "confidence": "certain",
+      "priority": 100,
+      "match": [{ "field": "isCrashReport", "eq": false }],
+      "summary": "This looks like {kind}, not an Atmosphère crash report, so there's nothing to diagnose here. Crash reports start with the line \"Atmosphère Crash Report\".",
+      "fix": ["Look for files named like 01793920898_01006a800016e000.log in atmosphere/crash_reports/ instead."],
+      "evidence": ["First line: {firstLine}"]
+    },
+    {
+      "id": "homebrew_app_crash",
+      "title": "Not Smash: a homebrew app crashed",
+      "severity": "warning",
+      "confidence": "certain",
+      "priority": 10,
+      "match": [
+        { "any": [
+          { "field": "programId", "eq": "01007ef00011e000" },
+          { "field": "processName", "eq": "hbloader" }
+        ] }
+      ],
+      "vars": { "app": { "fields": ["pc.module", "lr.module", "stack.module"], "notMatches": "^(nnSdk|nnrtld|\\[0+\\]|hbloader)$" } },
+      "summary": "This crash came from the homebrew menu (hbloader), not from Smash Ultimate. The app that crashed was \"{app}\". {appAdvice}",
+      "fix": [
+        "{appFix}",
+        "This crash has nothing to do with your Smash mods, so you can ignore it when debugging Smash."
+      ],
+      "evidence": ["Program ID = {programId} (hbloader = the homebrew menu)", "PC = {pc}", "LR = {lr}"]
+    },
+    {
+      "id": "skyline_page_boundary_verify",
+      "title": "Skyline's page-boundary bug",
+      "severity": "error",
+      "confidence": "certain",
+      "match": [
+        { "field": "programId", "eq": "01006a800016e000" },
+        { "field": "exceptionType", "eq": "Data Abort" },
+        { "field": "pc.module", "eq": "Skyline" },
+        { "field": "pc.moduleOffset", "in": ["0x4c58"] },
+        { "field": "address", "in": ["0x69"] }
+      ],
+      "summary": "Skyline (the code-injection framework every Smash plugin relies on) crashed on purpose while checking a patch. It checks a 4-byte patch by reading 8 bytes; on game 13.0.5 one patch sits at the very end of a memory page, so the extra 4 bytes come from the next page, the check fails, and Skyline aborts. In practice it shows up when Smashline is installed. Your mods themselves are not the problem.",
+      "fix": [
+        "Replace atmosphere/contents/01006A800016E000/exefs/subsdk9 with a Skyline build whose patch check reads 4 bytes (the patched subsdk9). Keep main.npdm.",
+        "Run the SD Card Scanner: it identifies which subsdk9 you have by its hash.",
+        "Until then, removing Smashline (romfs/skyline/plugins/libsmashline_plugin.nro) avoids the crash, but movesets won't work."
+      ],
+      "evidence": ["PC = {pc} (the deliberate abort in Skyline's patch check)", "LR = {lr}", "Fault address = {address}"],
+      "learnMore": "https://github.com/skyline-dev/skyline"
+    },
+    {
+      "id": "smashline2_old_clone_weapon_abi",
+      "title": "A moveset built for an older Smashline is running on Smashline 2.0",
+      "severity": "error",
+      "confidence": "likely",
+      "_builds": "LR offset 0x340 and PC 0x55d8 are from the official Smashline 2.0.0 build. Add new offsets here when a new build ships.",
+      "match": [
+        { "field": "programId", "eq": "01006a800016e000" },
+        { "field": "exceptionType", "eq": "Data Abort" },
+        { "field": "lr.symbol", "eq": "smashline_clone_weapon" },
+        { "field": "lr.symbolOffset", "in": ["0x340"] },
+        { "field": "address", "max": 4096 }
+      ],
+      "prefer": [
+        { "field": "pc.module", "eq": "smashline" },
+        { "field": "pc.moduleOffset", "in": ["0x55d8"] },
+        { "field": "context.smashlineVersion", "in": ["2.0.0"] }
+      ],
+      "summary": "Smashline 2.0.0 changed how movesets ask it to copy a weapon (clone_weapon). A moveset built for Smashline 1.6.8 or older passed a number where 2.0 expects text, and Smashline crashed reading address {address}. One of your movesets is too old for Smashline 2.0.",
+      "fix": [
+        "Find the moveset: run the SD Card Scanner. It lists movesets that use clone_weapon and were built for the old Smashline.",
+        "Either update that moveset to a Smashline 2.0 version, or move it out of ultimate/mods/.",
+        "Or go back to Smashline 1.6.8 (libsmashline_plugin.nro), which runs old movesets but not 2.0-only ones."
+      ],
+      "evidence": ["LR = {lr} (inside Smashline's clone_weapon)", "PC = {pc}", "Fault address = {address} (a small number used as a pointer)"],
+      "learnMore": "https://github.com/HDR-Development/smashline/wiki/%5BREAD!%5D-Major-Update-Information"
+    },
+    {
+      "id": "smashline168_new_clone_weapon_abi",
+      "title": "A moveset built for Smashline 2.0 is running on Smashline 1.6.8",
+      "severity": "error",
+      "confidence": "likely",
+      "_builds": "LR offset 0xa0 and PC 0x540c are from the official Smashline 1.6.8 build.",
+      "match": [
+        { "field": "programId", "eq": "01006a800016e000" },
+        { "field": "exceptionType", "eq": "Data Abort" },
+        { "field": "lr.symbol", "eq": "smashline_clone_weapon" },
+        { "field": "lr.symbolOffset", "in": ["0xa0"] },
+        { "field": "address", "max": 4096 }
+      ],
+      "prefer": [
+        { "field": "pc.module", "eq": "smashline" },
+        { "field": "pc.moduleOffset", "in": ["0x540c"] },
+        { "field": "context.smashlineVersion", "in": ["1.6.7", "1.6.8"] }
+      ],
+      "summary": "The reverse mismatch: a moveset built for Smashline 2.0 is running on Smashline 1.6.8. It used 2.0's new clone_weapon layout, so 1.6.8 treated the length of a name ({address}) as a memory address and crashed.",
+      "fix": [
+        "Install Smashline 2.0.0 (libsmashline_plugin.nro) for that moveset.",
+        "If you need 1.6.8 for other movesets, keep the new moveset out of ultimate/mods/ for now.",
+        "The SD Card Scanner flags movesets that were updated after Smashline 2.0 came out (28 Oct 2026)."
+      ],
+      "evidence": ["LR = {lr} (inside Smashline 1.6.8's clone_weapon)", "PC = {pc}", "Fault address = {address} (a string length used as a pointer)"],
+      "learnMore": "https://github.com/HDR-Development/smashline/wiki/%5BREAD!%5D-Major-Update-Information"
+    },
+    {
+      "id": "paramconfig_openfile_abort",
+      "title": "Param Config couldn't open a mod file",
+      "severity": "error",
+      "confidence": "likely",
+      "match": [
+        { "field": "programId", "eq": "01006a800016e000" },
+        { "field": "exceptionType", "eq": "User Break" },
+        { "field": "resultModule", "eq": 2002 },
+        { "stack": { "symbol": "nn::fs::OpenFile" } },
+        { "stack": { "module": "libparam_config" } }
+      ],
+      "prefer": [{ "field": "resultCode", "eq": "2002-4802" }, { "stack": { "symbol": "nn::diag::detail::AbortImpl" } }],
+      "summary": "The Param Config plugin tried to open a file in your mods folder, the file system said the data was broken or missing (result {result}), and the game aborted. In real cases this was caused by disabled mods (folders starting with a dot) left inside ultimate/mods/, and by broken entries in that folder.",
+      "fix": [
+        "Move disabled mods (folders whose name starts with '.') out of ultimate/mods/ into a separate folder such as ultimate/mods_all/.",
+        "Delete or repair broken entries in ultimate/mods/ (for example a mod that shows up as a single file instead of a folder).",
+        "Run the SD Card Scanner to find these automatically."
+      ],
+      "evidence": ["Result = {result} (file system: data corrupted)", "Called from {stackPlugin}", "Stack trace includes nn::fs::OpenFile -> nn::diag::Abort"]
+    },
+    {
+      "id": "arcropolis_openfile_abort",
+      "title": "ARCropolis couldn't open a mod file",
+      "severity": "error",
+      "confidence": "likely",
+      "match": [
+        { "field": "programId", "eq": "01006a800016e000" },
+        { "field": "exceptionType", "eq": "User Break" },
+        { "field": "resultModule", "eq": 2002 },
+        { "stack": { "symbol": "nn::fs::OpenFile" } },
+        { "stack": { "module": "arcropolis" } }
+      ],
+      "prefer": [{ "field": "resultCode", "eq": "2002-4802" }],
+      "summary": "ARCropolis (the plugin that loads your mod files) tried to open a file inside a mod and the file system refused (result {result}). In a real case this was The CSK Collection's optional config folders being active without the CSK plugin installed, plus disabled mods still inside ultimate/mods/.",
+      "fix": [
+        "If you use The CSK Collection's extra folders (e.g. 'Unlock All Characters'), make sure libthe_csk_collection.nro is in romfs/skyline/plugins/. Otherwise move those folders out of ultimate/mods/.",
+        "Move disabled (dot-prefixed) mods out of ultimate/mods/.",
+        "Run the SD Card Scanner."
+      ],
+      "evidence": ["Result = {result}", "Called from {stackPlugin}", "Stack trace includes nn::fs::OpenFile -> nn::diag::Abort"]
+    },
+    {
+      "id": "arcropolis_memcpy_bad_mod_folder",
+      "title": "A mod folder is malformed",
+      "severity": "error",
+      "confidence": "likely",
+      "match": [
+        { "field": "programId", "eq": "01006a800016e000" },
+        { "field": "exceptionType", "eq": "Data Abort" },
+        { "field": "pc.symbol", "eq": "__memcpy_device" },
+        { "field": "lr.module", "eq": "arcropolis" }
+      ],
+      "prefer": [{ "field": "lr.moduleOffset", "in": ["0x5c1f4"] }, { "dumpString": "mate/mod" }],
+      "summary": "ARCropolis crashed while copying mod file data into the game. In the real case behind this rule, one mod folder ('ultron') contained a second mod nested inside it and was missing its own plugin.nro. Something in your mods folder has the wrong layout.",
+      "fix": [
+        "Run the SD Card Scanner: it looks for mods nested inside other mods, missing plugin.nro files and the same plugin copied into two mods.",
+        "To confirm by hand: move half of your mods out of ultimate/mods/, launch once, and repeat with the half that crashes."
+      ],
+      "evidence": ["PC = {pc}", "LR = {lr}"]
+    },
+    {
+      "id": "moveset_code_crash",
+      "title": "A moveset's own code crashed",
+      "severity": "error",
+      "confidence": "likely",
+      "match": [
+        { "field": "programId", "eq": "01006a800016e000" },
+        { "any": [
+          { "field": "pc.module", "matches": "^smashline_." },
+          { "field": "lr.module", "matches": "^smashline_." }
+        ] }
+      ],
+      "vars": { "module": { "fields": ["pc.module", "lr.module"], "matches": "^smashline_." } },
+      "summary": "The crash happened inside the code of a moveset, in the module \"{module}\". That's the moveset's own code, not Smashline or ARCropolis, so that moveset is broken on your game or plugin versions.",
+      "fix": [
+        "Find the mod that contains {module} (usually its name gives it away) and move it out of ultimate/mods/.",
+        "Check its GameBanana page for an update for game 13.0.5 / your Smashline version."
+      ],
+      "evidence": ["PC = {pc}", "LR = {lr}", "Exception: {exceptionType} at {address}"]
+    },
+    {
+      "id": "vanilla_fighter_via_smashline_interpreter",
+      "title": "A normal fighter crashed while Smashline was running its scripts",
+      "severity": "warning",
+      "confidence": "possible",
+      "match": [
+        { "field": "programId", "eq": "01006a800016e000" },
+        { "field": "pc.module", "eq": "cross2_Release.nss" },
+        { "stack": { "moduleMatches": "^lua2cpp_\\w+\\.nrs$" } },
+        { "stack": { "symbol": "smashline_interpreter" } }
+      ],
+      "vars": { "fighter": { "fields": ["stack.module"], "matches": "^lua2cpp_(\\w+)\\.nrs$" } },
+      "summary": "The game crashed mid-match while running {fighterName}'s normal (unmodded) scripts through Smashline's script interpreter. No moveset's code is involved, so this is most likely a Smashline issue with that fighter.",
+      "fix": [
+        "Report it to Smashline's GitHub issues and attach this log.",
+        "Workaround: avoid {fighterName} until Smashline is updated, or try the other Smashline version."
+      ],
+      "evidence": ["PC = {pc} (inside the game itself)", "Stack includes lua2cpp_{fighter}.nrs ({fighterName}'s scripts)", "Stack includes smashline_interpreter"],
+      "learnMore": "https://github.com/HDR-Development/smashline/issues"
+    }
+  ]
+}

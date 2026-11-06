@@ -1,0 +1,25 @@
+{
+  "_about": "Module names seen in crash reports. 'system' modules are the game, the OS and the SDK; they're never the root cause on their own. 'display' is the plain-English name.",
+  "modules": {
+    "cross2_Release.nss": { "display": "the game itself (Smash Ultimate)", "system": true },
+    "nnSdk": { "display": "Nintendo's SDK", "system": true },
+    "nnrtld": { "display": "the module loader", "system": true },
+    "multimedia": { "display": "the multimedia library", "system": true },
+    "[00000000]": { "display": "an unnamed system module", "system": true },
+    "Skyline": { "display": "Skyline (the code-injection framework)", "product": "Skyline" },
+    "arcropolis": { "display": "ARCropolis (the mod file loader)", "product": "ARCropolis" },
+    "smashline": { "display": "Smashline (custom moveset code)", "product": "Smashline" },
+    "libparam_config": { "display": "the Param Config plugin", "product": "Param Config" },
+    "libone_slot_eff": { "display": "the One Slot Effects plugin", "product": "One Slot Effects" },
+    "one_slot_eff": { "display": "the One Slot Effects plugin", "product": "One Slot Effects" },
+    "libstage_config": { "display": "the Stage Config plugin", "product": "Stage Config" },
+    "libthe_csk_collection": { "display": "The CSK Collection plugin", "product": "The CSK Collection" },
+    "the_csk_collection": { "display": "The CSK Collection plugin", "product": "The CSK Collection" },
+    "nro_hook": { "display": "the NRO Hook plugin", "product": "NRO Hook" },
+    "libnro_hook": { "display": "the NRO Hook plugin", "product": "NRO Hook" }
+  },
+  "patterns": [
+    { "match": "^smashline_(.+)$", "display": "a moveset's code ({0})" },
+    { "match": "^lua2cpp_(\\w+)\\.nrs$", "display": "the game's {fighter} scripts" }
+  ]
+}

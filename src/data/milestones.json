@@ -1,0 +1,7 @@
+{
+  "_about": "Key dates. Mod update dates are compared against these. Add new entries when the game or a core plugin ships a breaking update.",
+  "milestones": [
+    { "id": "game_13_0_5", "date": "2026-09-01", "label": "Smash Ultimate 13.0.5", "beforeMeans": "Last updated before game 13.0.5: may be broken on the current game." },
+    { "id": "smashline_2_0_0", "date": "2026-10-28", "label": "Smashline 2.0.0", "beforeMeans": "Last updated before Smashline 2.0.0: if it clones weapons it was most likely built for Smashline 1.6.8." }
+  ]
+}
